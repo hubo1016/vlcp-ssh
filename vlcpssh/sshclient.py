@@ -93,3 +93,33 @@ class SSHFactory(object):
             sftp.put(localpath, remotepath, None if progresslimit is not None and progresslimit <= 0 else cb)
         for m in self.runAsyncTask(task):
             yield m
+    def getfo(self, sftp, remotepath, fl, progressobject = None, progresslimit = 0):
+        def task(sender):
+            lastprogress = [0]
+            po = progressobject
+            if po is None:
+                po = object()
+            def cb(p, t):
+                if progresslimit is not None:
+                    if p < lastprogress[0] * t / progresslimit:
+                        return
+                    lastprogress[0] += 1
+                sender((SFTPProgressEvent(self, sftp, po),))
+            sftp.getfo(remotepath, fl, None if progresslimit is not None and progresslimit <= 0 else cb)
+        for m in self.runAsyncTask(task):
+            yield m
+    def putfo(self, sftp, fl, remotepath, progressobject = None, progresslimit = 0):
+        def task(sender):
+            lastprogress = [0]
+            po = progressobject
+            if po is None:
+                po = object()
+            def cb(p, t):
+                if progresslimit is not None:
+                    if p < lastprogress[0] * t / progresslimit:
+                        return
+                    lastprogress[0] += 1
+                sender((SFTPProgressEvent(self, sftp, po),))
+            sftp.putfo(fl, remotepath, None if progresslimit is not None and progresslimit <= 0 else cb)
+        for m in self.runAsyncTask(task):
+            yield m
