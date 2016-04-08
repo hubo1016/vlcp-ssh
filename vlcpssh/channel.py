@@ -52,9 +52,15 @@ class Channel(RoutineContainer):
             firstTime = True
             eofExit = False
             maxsize = 4096
-            while not exitLoop:
+            while not exitLoop or self.exit_status == -1:
                 if not firstTime:
-                    yield (canread_matcher,)
+                    if exitLoop:
+                        for m in self.waitWithTimeout(1, canread_matcher):
+                            yield m
+                        if self.timeout:
+                            break
+                    else:
+                        yield (canread_matcher,)
                 else:
                     firstTime = False
                 while True:
