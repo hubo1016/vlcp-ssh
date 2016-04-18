@@ -34,6 +34,9 @@ class MainRoutine(RoutineContainer):
         chan = self.retvalue
         self.subroutine(self.printall(chan.stdout))
         self.subroutine(self.printall(chan.stderr))
+        for m in chan.wait(self):
+            yield m
+        print(self.retvalue)
 
 class MainModule(Module):
     def __init__(self, server):

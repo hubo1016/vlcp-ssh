@@ -221,6 +221,18 @@ class Channel(RoutineContainer):
         self._close()
         if False:
             yield
+    def wait(self, container, raiseException = True):
+        if self.readstop:
+            if raiseException and self.exit_status == -1:
+                raise IOError('Channel read exception occurs')
+            else:
+                container.retvalue = self.exit_status
+        else:
+            yield (ChannelExitEvent.createMatcher(self),)
+            if raiseException and container.event.ioerror:
+                raise IOError('Channel read exception occurs')
+            else:
+                container.retvalue = container.event.exitstatus
     def __repr__(self, *args, **kwargs):
         baserepr = RoutineContainer.__repr__(self, *args, **kwargs)
         return baserepr + '(#%d %r -> %r)' % (self.channel.get_id() if self.channel else 0, getattr(self, 'localaddr', None), getattr(self, 'remoteaddr', None))
