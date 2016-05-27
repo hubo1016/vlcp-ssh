@@ -57,6 +57,8 @@ class Channel(RoutineContainer):
                     if exitLoop:
                         for m in self.waitWithTimeout(1, canread_matcher):
                             yield m
+                        if self.channel.exit_status_ready():
+                            self.exit_status = self.channel.recv_exit_status()
                         if self.timeout:
                             break
                     else:
